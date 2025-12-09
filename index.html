@@ -756,9 +756,6 @@
             const legend = document.getElementById('legend');
             let html = '<h3>⌨️ KEYBOARD SHORTCUTS</h3>';
             
-            html += '<div class="legend-section"><h4>🎙️ RECORDING MODE</h4>';
-            html += '<div class="legend-item"><span class="key">SPACEBAR</span> Toggle Recording Mode</div></div>';
-            
             html += '<div class="legend-section"><h4>🎵 MUSICIANS</h4>';
             for (let i = 1; i <= 10; i++) {
                 const name = document.getElementById(`musician${i}-name`)?.value || '';
@@ -789,12 +786,12 @@
             
             html += '<div class="legend-section"><h4>📝 WORKFLOW</h4>';
             html += '<ol style="font-size: 11px; line-height: 1.8; padding-left: 20px; color: #d4d4d4;">';
-            html += '<li>Press <span class="key">SPACE</span> → Recording Mode</li>';
-            html += '<li>Press <span class="key">→</span> to start timer</li>';
+            html += '<li>Press <span class="key">→</span> to enter Recording Mode</li>';
+            html += '<li>Press <span class="key">→</span> again to start timer</li>';
             html += '<li>Press number to log timestamp</li>';
             html += '<li>Press letter to add comment</li>';
             html += '<li>Press <span class="key">↓</span> for new take</li>';
-            html += '<li>Export when done!</li></ol></div>';
+            html += '<li>Press <span class="key">→</span> to stop, then export!</li></ol></div>';
             
             html += '<div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,140,0,0.3); text-align: center; font-size: 10px; line-height: 1.5; color: #ff8c00;">';
             html += '©2025 Silverphonic SoundLab<br>';
@@ -836,11 +833,11 @@
             const indicator = document.getElementById('recordingModeIndicator');
             
             if (recordingMode) {
-                indicator.textContent = '🎙️ RECORDING MODE ACTIVE - Press SPACEBAR to exit';
+                indicator.textContent = '🎙️ RECORDING MODE ACTIVE - Press → to stop';
                 indicator.classList.add('recording-active');
                 if (!isRunning) toggleTimer();
             } else {
-                indicator.textContent = '📝 EDITING MODE - Press SPACEBAR to enter Recording Mode';
+                indicator.textContent = '📝 EDITING MODE - Press → to start recording';
                 indicator.classList.remove('recording-active');
                 if (isRunning) toggleTimer();
             }
@@ -849,18 +846,15 @@
         function handleKeyPress(e) {
             if (e.target.tagName === 'INPUT') return;
             
-            // SPACEBAR always works
-            if (e.key === ' ' && !e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey) {
-                e.preventDefault();
-                toggleRecordingMode();
-                return;
-            }
-            
             // ARROW KEY CONTROLS - Work anytime (Recording Mode ON or OFF)
-            // Right Arrow = Start/Stop Timer
+            // Right Arrow = Start/Stop Timer AND Toggle Recording Mode
             if (e.key === 'ArrowRight') {
                 e.preventDefault();
-                if (recordingMode) {
+                if (!recordingMode) {
+                    // If not in recording mode, enter it and start timer
+                    toggleRecordingMode();
+                } else {
+                    // If in recording mode, just toggle timer
                     toggleTimer();
                 }
                 return;
