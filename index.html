@@ -164,30 +164,30 @@
         }
         
         .btn-save { 
-            background: linear-gradient(180deg, #ff1493 0%, #c71585 100%);
+            background: linear-gradient(180deg, #4a9a5a 0%, #2a7a3a 100%);
             color: #fff;
             text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
         .btn-save:hover { 
-            background: linear-gradient(180deg, #ff33aa 0%, #dd2595 100%);
+            background: linear-gradient(180deg, #5aaa6a 0%, #3a8a4a 100%);
         }
         
         .btn-load { 
-            background: linear-gradient(180deg, #00d4ff 0%, #00a0cc 100%);
+            background: linear-gradient(180deg, #4a8fb4 0%, #2a6f94 100%);
             color: #fff;
             text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
         .btn-load:hover { 
-            background: linear-gradient(180deg, #1ae4ff 0%, #11b0dd 100%);
+            background: linear-gradient(180deg, #5a9fc4 0%, #3a7fa4 100%);
         }
         
         .btn-export { 
-            background: linear-gradient(180deg, #9b59b6 0%, #7d3c98 100%);
+            background: linear-gradient(180deg, #8b59a6 0%, #6b3c86 100%);
             color: #fff;
             text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
         .btn-export:hover { 
-            background: linear-gradient(180deg, #ab69c6 0%, #8d4ca8 100%);
+            background: linear-gradient(180deg, #9b69b6 0%, #7b4c96 100%);
         }
         
         .project-info {
@@ -249,6 +249,7 @@
                 inset 0 1px 0 rgba(255,255,255,0.2),
                 0 4px 8px rgba(255,140,0,0.3);
             color: #1a1a1a;
+            font-family: 'Audiowide', Impact, sans-serif;
         }
         
         #recordingModeIndicator.recording-active {
@@ -779,18 +780,20 @@
             html += '<div class="legend-item"><span class="key">Esc</span> Skip comment</div></div>';
             
             html += '<div class="legend-section"><h4>⚙️ CONTROLS</h4>';
-            html += '<div class="legend-item"><span class="key">R</span> Reset timer</div>';
-            html += '<div class="legend-item"><span class="key">N</span> New take</div>';
-            html += '<div class="legend-item"><span class="key">M</span> Reset to Take 1</div>';
+            html += '<div class="legend-item"><span class="key">→</span> Start/Stop timer</div>';
+            html += '<div class="legend-item"><span class="key">←</span> Reset timer to 00:00</div>';
+            html += '<div class="legend-item"><span class="key">↓</span> New take</div>';
+            html += '<div class="legend-item"><span class="key">↑</span> Reset to Take 1</div>';
             html += '<div class="legend-item"><span class="key">X</span> Undo last</div>';
             html += '<div class="legend-item"><span class="key">Z</span> Redo last</div></div>';
             
             html += '<div class="legend-section"><h4>📝 WORKFLOW</h4>';
             html += '<ol style="font-size: 11px; line-height: 1.8; padding-left: 20px; color: #d4d4d4;">';
             html += '<li>Press <span class="key">SPACE</span> → Recording Mode</li>';
+            html += '<li>Press <span class="key">→</span> to start timer</li>';
             html += '<li>Press number to log timestamp</li>';
             html += '<li>Press letter to add comment</li>';
-            html += '<li>Press <span class="key">N</span> for new take</li>';
+            html += '<li>Press <span class="key">↓</span> for new take</li>';
             html += '<li>Export when done!</li></ol></div>';
             
             html += '<div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,140,0,0.3); text-align: center; font-size: 10px; line-height: 1.5; color: #ff8c00;">';
@@ -853,21 +856,33 @@
                 return;
             }
             
-            // R, N, M work anytime (outside Recording Mode too)
-            if ((e.key === 'r' || e.key === 'R') && !recordingMode) {
+            // ARROW KEY CONTROLS - Work anytime (Recording Mode ON or OFF)
+            // Right Arrow = Start/Stop Timer
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                if (recordingMode) {
+                    toggleTimer();
+                }
+                return;
+            }
+            
+            // Left Arrow = Reset Timer
+            if (e.key === 'ArrowLeft') {
                 e.preventDefault();
                 elapsedSeconds = 0;
                 updateTimer();
                 return;
             }
             
-            if ((e.key === 'n' || e.key === 'N') && !recordingMode) {
+            // Down Arrow = New Take
+            if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 newTake();
                 return;
             }
             
-            if ((e.key === 'm' || e.key === 'M') && !recordingMode) {
+            // Up Arrow = Reset to Take 1
+            if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 resetToTake1();
                 return;
@@ -876,6 +891,7 @@
             // Recording Mode shortcuts
             if (!recordingMode) return;
             
+            // Number keys for musicians
             const numMap = {'1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '0': 10};
             if (numMap[e.key]) {
                 e.preventDefault();
@@ -883,6 +899,7 @@
                 return;
             }
             
+            // Comment keys Q-P (only when waiting for comment)
             const commentKeys = ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'];
             if (commentKeys.includes(e.key.toUpperCase()) && awaitingComment) {
                 e.preventDefault();
@@ -890,28 +907,10 @@
                 return;
             }
             
+            // Escape to skip comment
             if (e.key === 'Escape' && awaitingComment) {
                 e.preventDefault();
                 skipComment();
-                return;
-            }
-            
-            if (e.key === 'n' || e.key === 'N') {
-                e.preventDefault();
-                newTake();
-                return;
-            }
-            
-            if (e.key === 'm' || e.key === 'M') {
-                e.preventDefault();
-                resetToTake1();
-                return;
-            }
-            
-            if (e.key === 'r' || e.key === 'R') {
-                e.preventDefault();
-                elapsedSeconds = 0;
-                updateTimer();
                 return;
             }
             
