@@ -826,35 +826,42 @@
                     updateTimer();
                 }, 1000);
             }
+            updateRecordingModeIndicator();
         }
         
-        function toggleRecordingMode() {
-            recordingMode = !recordingMode;
+        function updateRecordingModeIndicator() {
             const indicator = document.getElementById('recordingModeIndicator');
             
-            if (recordingMode) {
-                indicator.textContent = '🎙️ RECORDING MODE ACTIVE - Press → to stop';
+            if (recordingMode && isRunning) {
+                indicator.textContent = '🎙️ RECORDING - Press → to stop';
                 indicator.classList.add('recording-active');
-                if (!isRunning) toggleTimer();
             } else {
-                indicator.textContent = '📝 EDITING MODE - Press → to start recording';
+                indicator.textContent = '📝 READY - Press → to start recording';
                 indicator.classList.remove('recording-active');
-                if (isRunning) toggleTimer();
             }
         }
         
         function handleKeyPress(e) {
             if (e.target.tagName === 'INPUT') return;
             
-            // ARROW KEY CONTROLS - Work anytime (Recording Mode ON or OFF)
-            // Right Arrow = Start/Stop Timer AND Toggle Recording Mode
+            // ARROW KEY CONTROLS
+            // Right Arrow = Start/Stop Timer (and automatically manages recording mode)
             if (e.key === 'ArrowRight') {
                 e.preventDefault();
-                if (!recordingMode) {
-                    // If not in recording mode, enter it and start timer
-                    toggleRecordingMode();
+                
+                if (isRunning) {
+                    // Stop timer and exit recording mode
+                    toggleTimer();
+                    if (recordingMode) {
+                        recordingMode = false;
+                        updateRecordingModeIndicator();
+                    }
                 } else {
-                    // If in recording mode, just toggle timer
+                    // Start timer and enter recording mode
+                    if (!recordingMode) {
+                        recordingMode = true;
+                        updateRecordingModeIndicator();
+                    }
                     toggleTimer();
                 }
                 return;
